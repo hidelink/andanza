@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { requestMagicLink } from "@/lib/auth-actions";
 import { Button } from "@/components/Button";
 
 type Status = "idle" | "sending" | "sent" | "error";
@@ -9,16 +9,18 @@ type Status = "idle" | "sending" | "sent" | "error";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setStatus("sending");
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    });
-    setStatus(error ? "error" : "sent");
+    const { error } = await requestMagicLink(email, window.location.origin);
+    if (error) {
+      setErrorMessage(error);
+      setStatus("error");
+    } else {
+      setStatus("sent");
+    }
   }
 
   return (
@@ -58,9 +60,7 @@ export default function LoginPage() {
             {status === "sending" ? "Enviando…" : "Enviar link de acceso"}
           </Button>
           {status === "error" && (
-            <p className="mt-2 text-sm text-brand-coral-600">
-              No se pudo enviar el link. Intenta de nuevo.
-            </p>
+            <p className="mt-2 text-sm text-brand-coral-600">{errorMessage}</p>
           )}
         </form>
       )}
