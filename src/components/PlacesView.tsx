@@ -61,12 +61,14 @@ export function PlacesView({
           Ninguno de tus lugares tiene un reel guardado todavía.
         </p>
       ) : (
-        <div className="columns-2 gap-3 sm:columns-3">
-          {placesWithReel.map((place) => (
-            <div key={place.id} className="mb-3 break-inside-avoid">
-              <ReelEmbed url={place.sourceReelUrl!} />
+        <div className="relative left-1/2 w-screen -translate-x-1/2">
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {placesWithReel.map((place) => (
+                <ReelEmbed key={place.id} url={place.sourceReelUrl!} />
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       )}
     </div>
