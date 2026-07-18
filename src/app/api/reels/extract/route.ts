@@ -3,15 +3,27 @@ import { scrapeInstagramPost } from "@/lib/extraction/brightdata";
 import { transcribeVideoUrl } from "@/lib/extraction/elevenlabs";
 import { structurePlace } from "@/lib/extraction/anthropic";
 import { geocodeAddress } from "@/lib/extraction/geocoding";
+import { findPlaceBySourceUrl } from "@/lib/data";
 
 export async function POST(request: Request) {
-  const { url } = await request.json();
+  const { url, force } = await request.json();
 
   if (!url || typeof url !== "string") {
     return NextResponse.json({ error: "Falta la URL del reel" }, { status: 400 });
   }
 
   try {
+    if (!force) {
+      const existing = await findPlaceBySourceUrl(url);
+      if (existing) {
+        return NextResponse.json({
+          duplicate: true,
+          existingPlaceName: existing.name,
+          existingCollectionId: existing.collectionId,
+        });
+      }
+    }
+
     const post = await scrapeInstagramPost(url);
 
     const videoUrl = post.videos?.[0] ?? null;

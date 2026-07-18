@@ -63,6 +63,22 @@ export async function getCollections(): Promise<CollectionSummary[]> {
   }));
 }
 
+export async function findPlaceBySourceUrl(
+  sourceReelUrl: string,
+): Promise<{ collectionId: string; name: string } | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("places")
+    .select("collection_id, name")
+    .eq("source_reel_url", sourceReelUrl)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+  return { collectionId: data.collection_id, name: data.name };
+}
+
 export async function getCollection(id: string): Promise<CollectionWithPlaces | null> {
   const supabase = await createClient();
 

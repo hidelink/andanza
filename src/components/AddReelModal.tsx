@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
 import { createPlaceAction } from "@/lib/actions";
 import type { LocationStatus } from "@/lib/types";
 
-type Step = "closed" | "form" | "processing" | "review" | "saving" | "error";
+type Step = "closed" | "form" | "processing" | "review" | "saving" | "error" | "duplicate";
 
 type Extracted = {
   name: string;
@@ -19,11 +20,17 @@ type Extracted = {
   region: string | null;
 };
 
+type DuplicateInfo = {
+  name: string;
+  collectionId: string;
+};
+
 export function AddReelModal({ collectionId }: { collectionId: string }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("closed");
   const [url, setUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [duplicateInfo, setDuplicateInfo] = useState<DuplicateInfo | null>(null);
   const [extracted, setExtracted] = useState<Extracted | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -32,17 +39,23 @@ export function AddReelModal({ collectionId }: { collectionId: string }) {
     setStep("closed");
   }
 
-  async function extract() {
+  async function extract(force = false) {
     if (!url.trim()) return;
     setStep("processing");
     try {
       const response = await fetch("/api/reels/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: url.trim(), force }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "No se pudo extraer el reel");
+
+      if (data.duplicate) {
+        setDuplicateInfo({ name: data.existingPlaceName, collectionId: data.existingCollectionId });
+        setStep("duplicate");
+        return;
+      }
 
       setExtracted({
         name: data.name,
@@ -103,7 +116,7 @@ export function AddReelModal({ collectionId }: { collectionId: string }) {
                   onChange={(event) => setUrl(event.target.value)}
                   className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm outline-none focus:border-border-strong"
                 />
-                <Button onClick={extract} className="mt-3 w-full justify-center">
+                <Button onClick={() => extract()} className="mt-3 w-full justify-center">
                   Extraer datos
                 </Button>
                 <button
@@ -129,6 +142,30 @@ export function AddReelModal({ collectionId }: { collectionId: string }) {
                 <p className="mb-3 text-sm text-brand-coral-600">{errorMessage}</p>
                 <Button onClick={() => setStep("form")} className="w-full justify-center">
                   Intentar de nuevo
+                </Button>
+                <button
+                  onClick={close}
+                  className="mt-2 w-full py-2 text-sm text-text-secondary hover:text-text-primary"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
+
+            {step === "duplicate" && duplicateInfo && (
+              <div>
+                <p className="mb-3 text-sm font-medium">Ya agregaste este reel</p>
+                <p className="mb-3 text-sm text-text-secondary">
+                  Ya existe como <span className="font-medium text-text-primary">{duplicateInfo.name}</span>.
+                </p>
+                <Link
+                  href={`/colecciones/${duplicateInfo.collectionId}`}
+                  className="mb-3 block text-sm text-brand-teal-800 underline"
+                >
+                  Ver ese lugar
+                </Link>
+                <Button onClick={() => extract(true)} className="w-full justify-center">
+                  Agregar de todas formas
                 </Button>
                 <button
                   onClick={close}

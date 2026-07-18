@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
 import { createPlaceAutoAction } from "@/lib/actions";
 import type { LocationStatus } from "@/lib/types";
 
-type Step = "idle" | "processing" | "review" | "saving" | "error";
+type Step = "idle" | "processing" | "review" | "saving" | "error" | "duplicate";
 
 type Extracted = {
   name: string;
@@ -19,11 +20,17 @@ type Extracted = {
   region: string | null;
 };
 
+type DuplicateInfo = {
+  name: string;
+  collectionId: string;
+};
+
 export function AddReelHome() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("idle");
   const [url, setUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [duplicateInfo, setDuplicateInfo] = useState<DuplicateInfo | null>(null);
   const [extracted, setExtracted] = useState<Extracted | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -33,19 +40,26 @@ export function AddReelHome() {
     setUrl("");
     setExtracted(null);
     setErrorMessage("");
+    setDuplicateInfo(null);
   }
 
-  async function extract() {
+  async function extract(force = false) {
     if (!url.trim()) return;
     setStep("processing");
     try {
       const response = await fetch("/api/reels/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: url.trim(), force }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "No se pudo extraer el reel");
+
+      if (data.duplicate) {
+        setDuplicateInfo({ name: data.existingPlaceName, collectionId: data.existingCollectionId });
+        setStep("duplicate");
+        return;
+      }
 
       setExtracted({
         name: data.name,
@@ -94,7 +108,7 @@ export function AddReelHome() {
             onChange={(event) => setUrl(event.target.value)}
             className="flex-1 rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm outline-none focus:border-border-strong"
           />
-          <Button onClick={extract} className="justify-center">
+          <Button onClick={() => extract()} className="justify-center">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
@@ -113,7 +127,31 @@ export function AddReelHome() {
         <div>
           <p className="mb-3 text-sm text-brand-coral-600">{errorMessage}</p>
           <div className="flex gap-2">
-            <Button onClick={extract}>Intentar de nuevo</Button>
+            <Button onClick={() => extract()}>Intentar de nuevo</Button>
+            <button
+              onClick={reset}
+              className="px-1 text-sm text-text-secondary hover:text-text-primary"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === "duplicate" && duplicateInfo && (
+        <div>
+          <p className="mb-2 text-sm text-text-secondary">
+            Ya agregaste este reel como{" "}
+            <span className="font-medium text-text-primary">{duplicateInfo.name}</span>.
+          </p>
+          <Link
+            href={`/colecciones/${duplicateInfo.collectionId}`}
+            className="mb-3 block text-sm text-brand-teal-800 underline"
+          >
+            Ver ese lugar
+          </Link>
+          <div className="flex gap-2">
+            <Button onClick={() => extract(true)}>Agregar de todas formas</Button>
             <button
               onClick={reset}
               className="px-1 text-sm text-text-secondary hover:text-text-primary"
