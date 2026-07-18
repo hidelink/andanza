@@ -20,6 +20,17 @@ export function PlacesView({
   const [tab, setTab] = useState<Tab>("lista");
   const placesWithReel = places.filter((place) => place.sourceReelUrl);
 
+  const regionGroups: [string, Place[]][] = [];
+  for (const place of places) {
+    const key = place.region?.trim() || "Otros";
+    const group = regionGroups.find(([region]) => region === key);
+    if (group) {
+      group[1].push(place);
+    } else {
+      regionGroups.push([key, [place]]);
+    }
+  }
+
   return (
     <div>
       <div className="mb-3 flex gap-1.5">
@@ -46,14 +57,25 @@ export function PlacesView({
       </div>
 
       {tab === "lista" ? (
-        <div className="flex flex-col gap-3">
-          {places.map((place) => (
-            <PlaceCard
-              key={place.id}
-              place={place}
-              accent={accent}
-              collectionId={collectionId}
-            />
+        <div className="flex flex-col gap-5">
+          {regionGroups.map(([region, groupPlaces]) => (
+            <div key={region}>
+              {regionGroups.length > 1 && (
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-text-muted">
+                  {region}
+                </p>
+              )}
+              <div className="flex flex-col gap-3">
+                {groupPlaces.map((place) => (
+                  <PlaceCard
+                    key={place.id}
+                    place={place}
+                    accent={accent}
+                    collectionId={collectionId}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       ) : placesWithReel.length === 0 ? (

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import {
   createCollection,
   createPlace,
+  findOrCreateCollectionByCountry,
   updatePlace,
   deletePlace,
   saveItinerary,
@@ -21,6 +22,15 @@ export async function createCollectionAction(name: string) {
 export async function createPlaceAction(collectionId: string, place: NewPlace) {
   await createPlace(collectionId, place);
   revalidatePath(`/colecciones/${collectionId}`);
+}
+
+export async function createPlaceAutoAction(place: NewPlace) {
+  const countryName = place.country?.trim() || "Sin país detectado";
+  const collectionId = await findOrCreateCollectionByCountry(countryName);
+  await createPlace(collectionId, place);
+  revalidatePath("/");
+  revalidatePath(`/colecciones/${collectionId}`);
+  return collectionId;
 }
 
 export async function updatePlaceAction(

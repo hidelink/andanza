@@ -10,6 +10,8 @@ export type Place = {
   lat: number | null;
   lng: number | null;
   sourceReelUrl: string | null;
+  country: string | null;
+  region: string | null;
 };
 
 export type CollectionSummary = {
@@ -75,7 +77,7 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
 
   const { data: places, error: placesError } = await supabase
     .from("places")
-    .select("id, name, description, location_status, lat, lng, source_reel_url")
+    .select("id, name, description, location_status, lat, lng, source_reel_url, country, region")
     .eq("collection_id", id)
     .order("created_at", { ascending: true });
 
@@ -93,6 +95,8 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
       lat: place.lat,
       lng: place.lng,
       sourceReelUrl: place.source_reel_url,
+      country: place.country,
+      region: place.region,
     })),
   };
 }
@@ -109,6 +113,21 @@ export async function createCollection(name: string): Promise<string> {
   return data.id;
 }
 
+export async function findOrCreateCollectionByCountry(country: string): Promise<string> {
+  const supabase = await createClient();
+  const { data: existing, error: findError } = await supabase
+    .from("collections")
+    .select("id")
+    .ilike("name", country)
+    .limit(1)
+    .maybeSingle();
+
+  if (findError) throw findError;
+  if (existing) return existing.id;
+
+  return createCollection(country);
+}
+
 export type NewPlace = {
   name: string;
   description: string;
@@ -116,6 +135,8 @@ export type NewPlace = {
   sourceReelUrl: string;
   lat?: number | null;
   lng?: number | null;
+  country?: string | null;
+  region?: string | null;
 };
 
 export async function createPlace(collectionId: string, place: NewPlace) {
@@ -128,6 +149,8 @@ export async function createPlace(collectionId: string, place: NewPlace) {
     source_reel_url: place.sourceReelUrl,
     lat: place.lat ?? null,
     lng: place.lng ?? null,
+    country: place.country ?? null,
+    region: place.region ?? null,
   });
 
   if (error) throw error;

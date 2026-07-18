@@ -15,6 +15,8 @@ type Extracted = {
   locationStatus: LocationStatus;
   lat: number | null;
   lng: number | null;
+  country: string | null;
+  region: string | null;
 };
 
 export function AddReelModal({ collectionId }: { collectionId: string }) {
@@ -48,6 +50,8 @@ export function AddReelModal({ collectionId }: { collectionId: string }) {
         locationStatus: data.locationStatus,
         lat: data.lat,
         lng: data.lng,
+        country: data.country,
+        region: data.region,
       });
       setName(data.name);
       setDescription(data.description);
@@ -68,6 +72,8 @@ export function AddReelModal({ collectionId }: { collectionId: string }) {
       sourceReelUrl: url.trim(),
       lat: extracted.lat,
       lng: extracted.lng,
+      country: extracted.country,
+      region: extracted.region,
     });
     router.refresh();
     setUrl("");

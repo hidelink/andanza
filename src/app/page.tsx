@@ -1,5 +1,6 @@
 import { CollectionCard } from "@/components/CollectionCard";
 import { NewCollectionForm } from "@/components/NewCollectionForm";
+import { AddReelHome } from "@/components/AddReelHome";
 import { getCollections } from "@/lib/data";
 
 export default async function Home() {
@@ -7,6 +8,13 @@ export default async function Home() {
 
   return (
     <div>
+      <div className="mb-6">
+        <p className="mb-2 text-sm font-medium text-text-secondary">
+          Pega un reel y Andanza detecta el país y la región por ti
+        </p>
+        <AddReelHome />
+      </div>
+
       <div className="mb-4 flex items-center justify-between">
         <p className="text-base font-medium">Tus colecciones</p>
         <NewCollectionForm />

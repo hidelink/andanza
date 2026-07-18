@@ -2,13 +2,15 @@ export function Badge({
   tone,
   children,
 }: {
-  tone: "success" | "warning";
+  tone: "success" | "warning" | "neutral";
   children: React.ReactNode;
 }) {
   const toneClasses =
     tone === "success"
       ? "bg-brand-teal-50 text-brand-teal-800"
-      : "bg-brand-amber-50 text-brand-amber-800";
+      : tone === "warning"
+        ? "bg-brand-amber-50 text-brand-amber-800"
+        : "bg-surface-2 text-text-secondary";
 
   return (
     <span

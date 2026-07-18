@@ -35,11 +35,15 @@ export async function POST(request: Request) {
 
     let lat: number | null = null;
     let lng: number | null = null;
+    let country: string | null = null;
+    let region: string | null = null;
     try {
       const geocoded = await geocodeAddress(structured.geocodeQuery);
       if (geocoded) {
         lat = geocoded.lat;
         lng = geocoded.lng;
+        country = geocoded.country;
+        region = geocoded.region;
       }
     } catch (error) {
       console.error("Geocoding failed, continuing without coordinates", error);
@@ -52,6 +56,8 @@ export async function POST(request: Request) {
       sourceReelUrl: url,
       lat,
       lng,
+      country,
+      region,
     });
   } catch (error) {
     console.error("Reel extraction failed", error);
