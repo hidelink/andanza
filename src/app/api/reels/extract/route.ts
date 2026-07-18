@@ -5,6 +5,10 @@ import { structurePlace } from "@/lib/extraction/anthropic";
 import { geocodeAddress } from "@/lib/extraction/geocoding";
 import { findPlaceBySourceUrl } from "@/lib/data";
 
+// Max allowed on Vercel Hobby without Fluid Compute; waitForSnapshot() in
+// brightdata.ts budgets its polling so the rest of the pipeline still fits.
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   const { url, force } = await request.json();
 

@@ -36,7 +36,9 @@ async function triggerScrape(url: string): Promise<string> {
 }
 
 async function waitForSnapshot(snapshotId: string): Promise<void> {
-  const maxAttempts = 30;
+  // Budget capped so the scrape leaves room for transcription/structuring/geocoding
+  // within the route's 60s Vercel function limit (see maxDuration in route.ts).
+  const maxAttempts = 20;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const response = await fetch(`${BASE_URL}/progress/${snapshotId}`, {
       headers: authHeaders(),
@@ -45,12 +47,14 @@ async function waitForSnapshot(snapshotId: string): Promise<void> {
 
     if (data.status === "ready") return;
     if (data.status === "failed") {
-      throw new Error(`Bright Data snapshot failed: ${JSON.stringify(data)}`);
+      throw new Error(`Bright Data snapshot failed (snapshot_id: ${snapshotId}): ${JSON.stringify(data)}`);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
   }
-  throw new Error("Bright Data snapshot timed out");
+  throw new Error(
+    `Bright Data snapshot timed out (snapshot_id: ${snapshotId}) — revisa su estado en https://api.brightdata.com/datasets/v3/progress/${snapshotId}`,
+  );
 }
 
 async function getSnapshot(snapshotId: string): Promise<InstagramPost> {
