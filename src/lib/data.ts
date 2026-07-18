@@ -9,6 +9,7 @@ export type Place = {
   locationStatus: LocationStatus;
   lat: number | null;
   lng: number | null;
+  sourceReelUrl: string | null;
 };
 
 export type CollectionSummary = {
@@ -74,7 +75,7 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
 
   const { data: places, error: placesError } = await supabase
     .from("places")
-    .select("id, name, description, location_status, lat, lng")
+    .select("id, name, description, location_status, lat, lng, source_reel_url")
     .eq("collection_id", id)
     .order("created_at", { ascending: true });
 
@@ -91,6 +92,7 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
       locationStatus: place.location_status as LocationStatus,
       lat: place.lat,
       lng: place.lng,
+      sourceReelUrl: place.source_reel_url,
     })),
   };
 }

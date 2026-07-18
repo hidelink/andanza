@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlaceCard } from "@/components/PlaceCard";
+import { PlacesView } from "@/components/PlacesView";
 import { AddReelModal } from "@/components/AddReelModal";
 import { Button } from "@/components/Button";
 import type { Accent } from "@/lib/accent";
@@ -48,11 +48,7 @@ export function CollectionDetail({
           Todavía no hay lugares en esta colección. Agrega tu primer reel.
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
-          {places.map((place) => (
-            <PlaceCard key={place.id} place={place} accent={accent} collectionId={collectionId} />
-          ))}
-        </div>
+        <PlacesView places={places} accent={accent} collectionId={collectionId} />
       )}
     </div>
   );
