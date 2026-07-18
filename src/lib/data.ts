@@ -12,6 +12,7 @@ export type Place = {
   sourceReelUrl: string | null;
   country: string | null;
   region: string | null;
+  needsReview: boolean;
 };
 
 export type CollectionSummary = {
@@ -93,7 +94,9 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
 
   const { data: places, error: placesError } = await supabase
     .from("places")
-    .select("id, name, description, location_status, lat, lng, source_reel_url, country, region")
+    .select(
+      "id, name, description, location_status, lat, lng, source_reel_url, country, region, needs_review",
+    )
     .eq("collection_id", id)
     .order("created_at", { ascending: true });
 
@@ -113,6 +116,7 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
       sourceReelUrl: place.source_reel_url,
       country: place.country,
       region: place.region,
+      needsReview: place.needs_review,
     })),
   };
 }
@@ -153,6 +157,7 @@ export type NewPlace = {
   lng?: number | null;
   country?: string | null;
   region?: string | null;
+  needsReview?: boolean;
 };
 
 export async function createPlace(collectionId: string, place: NewPlace) {
@@ -167,6 +172,7 @@ export async function createPlace(collectionId: string, place: NewPlace) {
     lng: place.lng ?? null,
     country: place.country ?? null,
     region: place.region ?? null,
+    needs_review: place.needsReview ?? false,
   });
 
   if (error) throw error;
@@ -178,6 +184,7 @@ export type PlaceUpdate = {
   locationStatus: LocationStatus;
   lat: number | null;
   lng: number | null;
+  needsReview: boolean;
 };
 
 export async function updatePlace(placeId: string, updates: PlaceUpdate) {
@@ -190,6 +197,7 @@ export async function updatePlace(placeId: string, updates: PlaceUpdate) {
       location_status: updates.locationStatus,
       lat: updates.lat,
       lng: updates.lng,
+      needs_review: updates.needsReview,
       updated_at: new Date().toISOString(),
     })
     .eq("id", placeId);

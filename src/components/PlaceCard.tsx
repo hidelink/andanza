@@ -71,6 +71,7 @@ export function PlaceCard({
       lat: searchResult ? searchResult.lat : place.lat,
       lng: searchResult ? searchResult.lng : place.lng,
       locationStatus: searchResult ? "confirmed" : place.locationStatus,
+      needsReview: false,
     });
     router.refresh();
     setSaving(false);
@@ -119,7 +120,21 @@ export function PlaceCard({
           </div>
         </div>
         <p className="mb-2 text-sm text-text-secondary">{place.description}</p>
-        {place.locationStatus === "confirmed" ? (
+        {place.needsReview ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="warning">Falta procesar, revisar manualmente</Badge>
+            {place.sourceReelUrl && (
+              <a
+                href={place.sourceReelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-brand-teal-800 underline"
+              >
+                Ver el post original
+              </a>
+            )}
+          </div>
+        ) : place.locationStatus === "confirmed" ? (
           <Badge tone="success">Ubicación confirmada</Badge>
         ) : (
           <Badge tone="warning">Ubicación inferida, revisar</Badge>

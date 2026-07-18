@@ -61,6 +61,22 @@ export function AddReelHome() {
         return;
       }
 
+      if (data.extractionFailed) {
+        const collectionId = await createPlaceAutoAction({
+          name: "Reel pendiente de revisar",
+          description: "",
+          locationStatus: "inferred",
+          sourceReelUrl: url.trim(),
+          lat: null,
+          lng: null,
+          country: null,
+          region: null,
+          needsReview: true,
+        });
+        router.push(`/colecciones/${collectionId}`);
+        return;
+      }
+
       setExtracted({
         name: data.name,
         description: data.description,
