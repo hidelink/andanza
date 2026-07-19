@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Accent } from "@/lib/accent";
 import type { LocationStatus } from "@/lib/types";
+import { extractInstagramShortcode } from "@/lib/instagramUrl";
 
 export type Place = {
   id: string;
@@ -69,10 +70,12 @@ export async function findPlaceBySourceUrl(
   sourceReelUrl: string,
 ): Promise<{ collectionId: string; name: string } | null> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("places")
-    .select("collection_id, name")
-    .eq("source_reel_url", sourceReelUrl)
+  const shortcode = extractInstagramShortcode(sourceReelUrl);
+
+  const { data, error } = await (shortcode
+    ? supabase.from("places").select("collection_id, name").eq("reel_shortcode", shortcode)
+    : supabase.from("places").select("collection_id, name").eq("source_reel_url", sourceReelUrl)
+  )
     .limit(1)
     .maybeSingle();
 
@@ -180,6 +183,7 @@ export async function createPlace(collectionId: string, place: NewPlace) {
     description: place.description,
     location_status: place.locationStatus,
     source_reel_url: place.sourceReelUrl,
+    reel_shortcode: extractInstagramShortcode(place.sourceReelUrl),
     lat: place.lat ?? null,
     lng: place.lng ?? null,
     country: place.country ?? null,

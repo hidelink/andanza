@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { extractInstagramShortcode } from "@/lib/instagramUrl";
 import type { NewPlace } from "@/lib/data";
 
 // Counterparts to the RLS-scoped functions in data.ts, for the token-
@@ -11,11 +12,12 @@ export async function adminFindPlaceBySourceUrl(
   sourceReelUrl: string,
 ): Promise<{ collectionId: string; name: string } | null> {
   const admin = createAdminClient();
-  const { data, error } = await admin
-    .from("places")
-    .select("collection_id, name")
-    .eq("user_id", userId)
-    .eq("source_reel_url", sourceReelUrl)
+  const shortcode = extractInstagramShortcode(sourceReelUrl);
+
+  const { data, error } = await (shortcode
+    ? admin.from("places").select("collection_id, name").eq("user_id", userId).eq("reel_shortcode", shortcode)
+    : admin.from("places").select("collection_id, name").eq("user_id", userId).eq("source_reel_url", sourceReelUrl)
+  )
     .limit(1)
     .maybeSingle();
 
@@ -59,6 +61,7 @@ export async function adminCreatePlace(userId: string, collectionId: string, pla
     description: place.description,
     location_status: place.locationStatus,
     source_reel_url: place.sourceReelUrl,
+    reel_shortcode: extractInstagramShortcode(place.sourceReelUrl),
     lat: place.lat ?? null,
     lng: place.lng ?? null,
     country: place.country ?? null,
