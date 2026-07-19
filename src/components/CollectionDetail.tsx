@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PlacesView } from "@/components/PlacesView";
 import { AddReelModal } from "@/components/AddReelModal";
+import { ShareCollectionButton } from "@/components/ShareCollectionButton";
 import { Button } from "@/components/Button";
 import type { Accent } from "@/lib/accent";
 import type { Place } from "@/lib/data";
@@ -10,11 +11,13 @@ export function CollectionDetail({
   name,
   accent,
   places,
+  isPublic,
 }: {
   collectionId: string;
   name: string;
   accent: Accent;
   places: Place[];
+  isPublic: boolean;
 }) {
   return (
     <div>
@@ -31,6 +34,7 @@ export function CollectionDetail({
       <div className="mb-4 flex items-center justify-between">
         <p className="text-base font-medium">{name}</p>
         <div className="flex gap-2">
+          <ShareCollectionButton collectionId={collectionId} initialIsPublic={isPublic} />
           <AddReelModal collectionId={collectionId} />
           <Link href={`/colecciones/${collectionId}/itinerario`}>
             <Button>

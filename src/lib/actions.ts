@@ -8,6 +8,7 @@ import {
   updatePlace,
   deletePlace,
   saveItinerary,
+  setCollectionPublic,
   type NewPlace,
   type PlaceUpdate,
 } from "@/lib/data";
@@ -53,4 +54,10 @@ export async function generateItineraryAction(collectionId: string, days: number
   await saveItinerary(collectionId, days, plan);
   revalidatePath(`/colecciones/${collectionId}/itinerario`);
   return plan;
+}
+
+export async function setCollectionPublicAction(collectionId: string, isPublic: boolean) {
+  await setCollectionPublic(collectionId, isPublic);
+  revalidatePath(`/colecciones/${collectionId}`);
+  revalidatePath(`/compartido/${collectionId}`);
 }

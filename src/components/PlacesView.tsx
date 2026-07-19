@@ -12,10 +12,12 @@ export function PlacesView({
   places,
   accent,
   collectionId,
+  readOnly = false,
 }: {
   places: Place[];
   accent: Accent;
   collectionId: string;
+  readOnly?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("lista");
   const placesWithReel = places.filter((place) => place.sourceReelUrl);
@@ -72,6 +74,7 @@ export function PlacesView({
                     place={place}
                     accent={accent}
                     collectionId={collectionId}
+                    readOnly={readOnly}
                   />
                 ))}
               </div>

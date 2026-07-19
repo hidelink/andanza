@@ -20,6 +20,7 @@ export default async function CollectionPage({
       name={collection.name}
       accent={collection.accent}
       places={collection.places}
+      isPublic={collection.isPublic}
     />
   );
 }

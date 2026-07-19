@@ -26,6 +26,7 @@ export type CollectionWithPlaces = {
   id: string;
   name: string;
   accent: Accent;
+  isPublic: boolean;
   places: Place[];
 };
 
@@ -85,7 +86,7 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
 
   const { data: collection, error: collectionError } = await supabase
     .from("collections")
-    .select("id, name")
+    .select("id, name, is_public")
     .eq("id", id)
     .maybeSingle();
 
@@ -106,6 +107,7 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
     id: collection.id,
     name: collection.name,
     accent: accentForId(collection.id),
+    isPublic: collection.is_public,
     places: (places ?? []).map((place) => ({
       id: place.id,
       name: place.name,
@@ -119,6 +121,16 @@ export async function getCollection(id: string): Promise<CollectionWithPlaces | 
       needsReview: place.needs_review,
     })),
   };
+}
+
+export async function setCollectionPublic(collectionId: string, isPublic: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("collections")
+    .update({ is_public: isPublic })
+    .eq("id", collectionId);
+
+  if (error) throw error;
 }
 
 export async function createCollection(name: string): Promise<string> {

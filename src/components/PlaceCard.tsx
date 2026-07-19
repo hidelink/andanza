@@ -13,10 +13,12 @@ export function PlaceCard({
   place,
   accent,
   collectionId,
+  readOnly = false,
 }: {
   place: Place;
   accent: Accent;
   collectionId: string;
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const accentClass = accentClasses[accent];
@@ -96,28 +98,30 @@ export function PlaceCard({
       <div className="flex-1">
         <div className="mb-0.5 flex items-start justify-between gap-2">
           <p className="text-sm font-medium">{place.name}</p>
-          <div className="flex flex-none gap-1">
-            <button
-              onClick={openEdit}
-              aria-label="Editar"
-              className="rounded-md p-1 text-text-secondary hover:bg-surface-2 hover:text-text-primary"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-              </svg>
-            </button>
-            <button
-              onClick={remove}
-              aria-label="Eliminar"
-              className="rounded-md p-1 text-text-secondary hover:bg-surface-2 hover:text-text-primary"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6h18" />
-                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-              </svg>
-            </button>
-          </div>
+          {!readOnly && (
+            <div className="flex flex-none gap-1">
+              <button
+                onClick={openEdit}
+                aria-label="Editar"
+                className="rounded-md p-1 text-text-secondary hover:bg-surface-2 hover:text-text-primary"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+              </button>
+              <button
+                onClick={remove}
+                aria-label="Eliminar"
+                className="rounded-md p-1 text-text-secondary hover:bg-surface-2 hover:text-text-primary"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18" />
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
         <p className="mb-2 text-sm text-text-secondary">{place.description}</p>
         {place.needsReview ? (
@@ -141,7 +145,7 @@ export function PlaceCard({
         )}
       </div>
 
-      {editing && (
+      {!readOnly && editing && (
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-5">
             <p className="mb-3 text-sm font-medium">Editar lugar</p>
