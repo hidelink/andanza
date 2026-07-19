@@ -13,6 +13,7 @@ import {
   type PlaceUpdate,
 } from "@/lib/data";
 import { generateItineraryPlan } from "@/lib/itinerary/generate";
+import { regenerateShareToken } from "@/lib/shareToken";
 
 export async function createCollectionAction(name: string) {
   const id = await createCollection(name);
@@ -60,4 +61,10 @@ export async function setCollectionPublicAction(collectionId: string, isPublic: 
   await setCollectionPublic(collectionId, isPublic);
   revalidatePath(`/colecciones/${collectionId}`);
   revalidatePath(`/compartido/${collectionId}`);
+}
+
+export async function regenerateShareTokenAction() {
+  const token = await regenerateShareToken();
+  revalidatePath("/ajustes");
+  return token;
 }

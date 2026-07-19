@@ -21,7 +21,17 @@ export async function Header() {
           </span>
           <span className="text-[15px] font-medium">Andanza</span>
         </Link>
-        {user && <SignOutButton />}
+        {user && (
+          <div className="flex items-center gap-4">
+            <Link
+              href="/ajustes"
+              className="text-sm text-text-secondary hover:text-text-primary"
+            >
+              Ajustes
+            </Link>
+            <SignOutButton />
+          </div>
+        )}
       </div>
     </header>
   );

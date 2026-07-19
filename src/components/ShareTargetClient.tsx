@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/Button";
 import { createPlaceAutoAction } from "@/lib/actions";
+import { extractInstagramUrl } from "@/lib/instagramUrl";
 
 type Step = "processing" | "error" | "duplicate" | "not-found";
 
@@ -11,8 +12,6 @@ type DuplicateInfo = {
   name: string;
   collectionId: string;
 };
-
-const INSTAGRAM_URL_PATTERN = /https?:\/\/(www\.)?instagram\.com\/[^\s"']+/;
 
 export function ShareTargetClient() {
   const router = useRouter();
@@ -31,13 +30,12 @@ export function ShareTargetClient() {
       .filter(Boolean)
       .join(" ");
 
-    const match = combined.match(INSTAGRAM_URL_PATTERN);
-    if (!match) {
+    const url = extractInstagramUrl(combined);
+    if (!url) {
       setStep("not-found");
       return;
     }
 
-    const url = match[0];
     setReelUrl(url);
     void run(url, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
